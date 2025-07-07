@@ -1,0 +1,44 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  GOOGLE_CLOUD_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+  GOOGLE_CLOUD_PROJECT_NUMBER: ${{ secrets.GOOGLE_CLOUD_PROJECT_NUMBER }}
+  GOOGLE_CLOUD_REGION: ${{ secrets.GOOGLE_CLOUD_REGION }}
+  DEPLOYER_SERVICE_ACCOUNT_NAME: ${{ secrets.DEPLOYER_SERVICE_ACCOUNT_NAME }}
+  DEPLOYER_SERVICE_ACCOUNT_EMAIL: ${{ secrets.DEPLOYER_SERVICE_ACCOUNT_NAME }}@${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}.iam.gserviceaccount.com
+  WORKLOAD_IDENTITY_POOL_ID: ${{ secrets.WORKLOAD_IDENTITY_POOL_ID }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+
+jobs:
+  verify-oidc-connection:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/${{ env.GOOGLE_CLOUD_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/${{ env.WORKLOAD_IDENTITY_POOL_ID }}/providers/${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ env.DEPLOYER_SERVICE_ACCOUNT_EMAIL }}'
+      
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+      
+      - name: Verify OIDC connection
+        run: |
+          echo "OIDC connection established successfully!"
