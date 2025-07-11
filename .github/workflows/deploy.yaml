@@ -14,6 +14,8 @@ env:
   DEPLOYER_SERVICE_ACCOUNT_EMAIL: ${{ secrets.DEPLOYER_SERVICE_ACCOUNT_NAME }}@${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}.iam.gserviceaccount.com
   WORKLOAD_IDENTITY_POOL_ID: ${{ secrets.WORKLOAD_IDENTITY_POOL_ID }}
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  ARTIFACT_REGISTRY_REPOSITORY: ${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
+  WEB_APP_IMAGE_NAME: ${{ secrets.WEB_APP_IMAGE_NAME }}
 
 jobs:
   verify-oidc-connection:
@@ -42,3 +44,17 @@ jobs:
       - name: Verify OIDC connection
         run: |
           echo "OIDC connection established successfully!"
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev
+      
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} \
+            ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:latest
+
+      - name: Push Docker image to Artifact Registry
+        run: |
+          docker push ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }}
