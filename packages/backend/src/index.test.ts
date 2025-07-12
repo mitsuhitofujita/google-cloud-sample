@@ -1,8 +1,9 @@
-import fastify, { FastifyRequest, FastifyReply } from "fastify";
+import fastify from "fastify";
+import type { FastifyRequest, FastifyReply } from "fastify";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 
 let server: ReturnType<typeof fastify>;
-let address: string;
+
 
 beforeAll(async () => {
   server = fastify();
@@ -12,7 +13,7 @@ beforeAll(async () => {
   server.get("/ping", async (_request: FastifyRequest, _reply: FastifyReply) => {
     return "pong\n";
   });
-  address = await server.listen({ port: 0, host: "127.0.0.1" });
+  await server.listen({ port: 0, host: "127.0.0.1" });
 });
 
 afterAll(async () => {
