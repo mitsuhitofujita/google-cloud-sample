@@ -1,0 +1,25 @@
+[
+  {
+    "action": {
+      "type": "DELETE"
+    },
+    "condition": {
+      "olderThan": "604800s",
+      "tagState": "TAG_STATE_UNSPECIFIED"
+    },
+    "name": "delete-old-images"
+  },
+  {
+    "action": {
+      "type": "KEEP"
+    },
+    "condition": {
+      "tagPrefixes": [
+        "stable",
+        "release-"
+      ],
+      "tagState": "TAGGED"
+    },
+    "name": "keep-specified-tagged-images"
+  }
+]

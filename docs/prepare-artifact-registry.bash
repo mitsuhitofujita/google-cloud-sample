@@ -25,7 +25,12 @@ gcloud projects add-iam-policy-binding ${GOOGLE_CLOUD_PROJECT_ID} \
     --member="serviceAccount:${DEPLOYER_SERVICE_ACCOUNT_NAME}@${GOOGLE_CLOUD_PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/artifactregistry.writer"
 
-# サービスアカウントに対する権限確認（すでに設定済みのはず）
+# サービスアカウントに対する権限確認
 gcloud projects get-iam-policy ${GOOGLE_CLOUD_PROJECT_ID} \
     --flatten="bindings[].members" \
     --filter="bindings.members:serviceAccount:${DEPLOYER_SERVICE_ACCOUNT_NAME}@${GOOGLE_CLOUD_PROJECT_ID}.iam.gserviceaccount.com"
+
+# 30日以上古いタグなしイメージを削除するポリシー
+gcloud artifacts repositories set-cleanup-policies ${ARTIFACT_REGISTRY_REPOSITORY} \
+    --location=${GOOGLE_CLOUD_REGION} \
+    --policy=./docs/artifact-registry-cleanup-policy.json
