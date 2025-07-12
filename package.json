@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "pnpm -F backend exec biome check src",
     "dev": "pnpm -F backend dev",
     "build": "pnpm -F backend build",
     "start": "pnpm -F backend start"
