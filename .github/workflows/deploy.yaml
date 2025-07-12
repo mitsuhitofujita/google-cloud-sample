@@ -16,9 +16,12 @@ env:
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
   ARTIFACT_REGISTRY_REPOSITORY: ${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
   WEB_APP_IMAGE_NAME: ${{ secrets.WEB_APP_IMAGE_NAME }}
+  CLOUD_RUN_SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+  RUNNER_SERVICE_ACCOUNT_NAME: ${{ secrets.RUNNER_SERVICE_ACCOUNT_NAME }}
+  RUNNER_SERVICE_ACCOUNT_EMAIL: ${{ secrets.RUNNER_SERVICE_ACCOUNT_NAME }}@${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}.iam.gserviceaccount.com
 
 jobs:
-  verify-oidc-connection:
+  deploy:
     runs-on: ubuntu-latest
     
     permissions:
@@ -44,7 +47,7 @@ jobs:
       - name: Verify OIDC connection
         run: |
           echo "OIDC connection established successfully!"
-
+          
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev
@@ -54,7 +57,44 @@ jobs:
           docker build -t ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} .
           docker tag ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} \
             ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:latest
-
+            
       - name: Push Docker image to Artifact Registry
         run: |
           docker push ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }}
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.CLOUD_RUN_SERVICE }} \
+            --image=${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} \
+            --region=${{ env.GOOGLE_CLOUD_REGION }} \
+            --platform=managed \
+            --port=8080 \
+            --allow-unauthenticated \
+            --min-instances=0 \
+            --max-instances=1 \
+            --cpu=1 \
+            --memory=512Mi \
+            --timeout=300 \
+            --service-account=${{ env.RUNNER_SERVICE_ACCOUNT_EMAIL }}
+      
+      - name: Get Cloud Run service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GOOGLE_CLOUD_REGION }} \
+            --format="value(status.url)")
+          
+          echo "Service deployed successfully! 🎉"
+          echo "URL: ${SERVICE_URL}"
+          echo "SERVICE_URL=${SERVICE_URL}" >> $GITHUB_ENV
+      
+      - name: Test deployment
+        run: |
+          echo "Testing deployment..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${SERVICE_URL}/ping")
+          if [ "$response" = "200" ]; then
+            echo "✅ Health check passed!"
+          else
+            echo "❌ Health check failed with status code: $response"
+            exit 1
+          fi
+      
