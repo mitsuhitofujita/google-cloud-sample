@@ -41,4 +41,4 @@ COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 EXPOSE 8080
 
 # Start the application
-CMD ["node", "packages/backend/dist/server.js"]
+CMD ["node", "packages/backend/dist/index.js"]
