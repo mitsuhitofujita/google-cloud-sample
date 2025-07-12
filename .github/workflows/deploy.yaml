@@ -88,6 +88,7 @@ jobs:
           echo "SERVICE_URL=${SERVICE_URL}" >> $GITHUB_ENV
       
       - name: Test deployment
+        id: health_check
         run: |
           echo "Testing deployment..."
           response=$(curl -s -o /dev/null -w "%{http_code}" "${SERVICE_URL}/ping")
@@ -98,3 +99,17 @@ jobs:
             exit 1
           fi
       
+      - name: Tag stable release
+        if: success() && steps.health_check.outcome == 'success'
+        run: |
+          echo "Tagging image as stable..."
+          gcloud artifacts docker tags add \
+            ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} \
+            ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:stable
+          
+          echo "✅ Successfully tagged image as stable"
+          
+          echo "Current tags for this image:"
+          gcloud artifacts docker tags list \
+            --package=${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }} \
+            --filter="version='sha256:$(docker inspect --format='{{index .RepoDigests 0}}' ${{ env.GOOGLE_CLOUD_REGION }}-docker.pkg.dev/${{ env.GOOGLE_CLOUD_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY_REPOSITORY }}/${{ env.WEB_APP_IMAGE_NAME }}:${{ github.sha }} | cut -d'@' -f2)'"
