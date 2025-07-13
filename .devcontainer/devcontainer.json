@@ -4,7 +4,8 @@
 	"image": "mcr.microsoft.com/devcontainers/typescript-node:20",
 	// 開発に必要なツールやライブラリをインストール
 	"features": {
-		"ghcr.io/dhoeric/features/google-cloud-cli:1": {}
+		"ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+		"./features/claude-code": {}
 	},
 	// Fastifyのデフォルトポートをフォワード
 	"forwardPorts": [8080],
@@ -13,7 +14,7 @@
 	// 拡張機能や設定のカスタマイズ
 	"customizations": {
 		"vscode": {
-			"extensions": ["biomejs.biome"]
+			"extensions": ["biomejs.biome", "anthropic.claude-code"]
 		}
 	}
 }

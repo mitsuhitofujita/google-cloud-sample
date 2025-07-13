@@ -1,0 +1,7 @@
+{
+	"id": "claude-code",
+	"version": "1.0.0",
+	"name": "Anthropic Claude Code",
+	"description": "Installs the Anthropic Claude Code extension",
+	"installsAfter": ["node"]
+}
