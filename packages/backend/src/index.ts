@@ -1,12 +1,15 @@
+import path from "node:path";
+import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
 
 const server = fastify();
 
 const port = Number(process.env.PORT) || 8080;
 
-// ヘルスチェック用のルートパス
-server.get("/", async (_request, _reply) => {
-	return { status: "ok" };
+// Serve static files from the React build directory
+server.register(fastifyStatic, {
+	root: path.join(__dirname, "../../frontend/dist"),
+	prefix: "/",
 });
 
 server.get("/ping", async (_request, _reply) => {
