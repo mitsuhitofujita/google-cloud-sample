@@ -14,7 +14,7 @@ COPY packages/ ./packages/
 RUN pnpm install --frozen-lockfile
 
 # Build frontend and backend
-#RUN pnpm --filter frontend build
+RUN pnpm --filter frontend build
 RUN pnpm --filter backend build
 
 # Production stage
@@ -27,14 +27,14 @@ RUN npm install -g pnpm
 
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-#COPY packages/frontend/package.json ./packages/frontend/
+COPY packages/frontend/package.json ./packages/frontend/
 COPY packages/backend/package.json ./packages/backend/
 
 # Install only production dependencies
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built applications
-#COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
+COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 
 # Expose port
