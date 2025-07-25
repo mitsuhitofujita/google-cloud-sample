@@ -36,9 +36,6 @@ importers:
 
   packages/frontend:
     dependencies:
-      '@fastify/static':
-        specifier: ^8.2.0
-        version: 8.2.0
       react:
         specifier: ^19.1.0
         version: 19.1.0
