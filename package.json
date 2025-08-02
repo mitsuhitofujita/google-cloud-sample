@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "pnpm -F backend test",
-		"check": "pnpm -F backend exec biome check src",
+		"check": "pnpm -F frontend exec biome check src && pnpm -F backend exec biome check src",
+		"fix": "pnpm -F frontend exec biome check src --write && pnpm -F backend exec biome check src --write",
 		"dev": "pnpm -F frontend build && pnpm -F backend dev",
 		"build": "pnpm -F frontend build && pnpm -F backend build",
 		"start": "pnpm -F backend start"
