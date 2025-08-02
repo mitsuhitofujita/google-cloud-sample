@@ -85,7 +85,7 @@ jobs:
             --memory=512Mi \
             --timeout=300 \
             --service-account=${{ env.RUNNER_SERVICE_ACCOUNT_EMAIL }} \
-            --set-env-vars="GOOGLE_CLIENT_ID=${{ env.GOOGLE_CLIENT_ID }},JWT_SECRET=${{ env.JWT_SECRET }},NODE_ENV=production"
+            --set-env-vars="GOOGLE_CLIENT_ID=${{ env.GOOGLE_CLIENT_ID }},JWT_SECRET=${{ env.JWT_SECRET }},NODE_ENV=production,GOOGLE_CLOUD_PROJECT_ID=${{ env.GOOGLE_CLOUD_PROJECT_ID }}"
       
       - name: Get Cloud Run service URL
         run: |

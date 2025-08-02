@@ -3,7 +3,7 @@ import type { User } from "../types/index";
 
 const firestore = new Firestore({
 	projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-	keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+	// keyFilename is not needed in Cloud Run - uses service account automatically
 });
 
 const usersCollection = "users";
