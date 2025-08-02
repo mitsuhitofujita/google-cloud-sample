@@ -21,6 +21,10 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 RUN pnpm --filter frontend build
 RUN pnpm --filter backend build
 
+# Verify build outputs exist
+RUN ls -la /app/packages/frontend/dist/ || echo "Frontend dist not found!"
+RUN ls -la /app/packages/backend/dist/ || echo "Backend dist not found!"
+
 # Production stage
 FROM node:20-alpine
 

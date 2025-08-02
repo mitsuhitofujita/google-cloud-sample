@@ -96,6 +96,15 @@ jobs:
           echo "Service deployed successfully! 🎉"
           echo "SERVICE_URL=${SERVICE_URL}" >> $GITHUB_ENV
       
+      - name: Get Cloud Run logs
+        if: always()
+        run: |
+          echo "Getting Cloud Run logs..."
+          gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=${{ env.CLOUD_RUN_SERVICE }}" \
+            --limit=20 \
+            --format="table(timestamp, severity, textPayload)" \
+            --project=${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+
       - name: Test deployment
         id: health_check
         run: |
@@ -105,6 +114,11 @@ jobs:
             echo "✅ Health check passed!"
           else
             echo "❌ Health check failed with status code: $response"
+            echo "Getting recent logs for debugging..."
+            gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=${{ env.CLOUD_RUN_SERVICE }}" \
+              --limit=10 \
+              --format="table(timestamp, severity, textPayload)" \
+              --project=${{ env.GOOGLE_CLOUD_PROJECT_ID }}
             exit 1
           fi
       
