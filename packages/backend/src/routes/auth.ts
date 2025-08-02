@@ -77,8 +77,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
 		},
 		async (request, reply) => {
 			fastify.log.info("Verify endpoint called");
-			fastify.log.info("Request cookies:", request.cookies);
-			fastify.log.info("Request user:", request.user);
+			fastify.log.info({ cookies: request.cookies }, "Request cookies");
+			fastify.log.info({ user: request.user }, "Request user");
 			return reply.send(request.user);
 		},
 	);

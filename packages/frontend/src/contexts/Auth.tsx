@@ -31,10 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				});
 
 				if (response.ok) {
-					const jwtPayload = await response.json();
-					// The payload structure from backend is { user: User }
-					if (jwtPayload.user) {
-						setUser(jwtPayload.user);
+					const userData = await response.json();
+					// The backend returns the user object directly
+					if (userData) {
+						setUser(userData);
 					}
 				}
 			} catch (error) {
