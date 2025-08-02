@@ -51,8 +51,16 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			// Generate JWT token
 			const token = fastify.jwt.sign({ user } as JWTPayload);
 
+			// Set httpOnly cookie
+			reply.setCookie("authToken", token, {
+				httpOnly: true,
+				secure: process.env.NODE_ENV === "production",
+				sameSite: "strict",
+				path: "/",
+				maxAge: 60 * 60 * 24 * 7, // 7 days
+			});
+
 			return reply.send({
-				token,
 				user,
 			});
 		} catch (error) {
@@ -74,8 +82,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
 	// Sign out endpoint
 	fastify.post("/auth/sign-out", async (_request, reply) => {
-		// Note: With JWT, actual sign-out happens on the client side
-		// by removing the token from storage
+		// Clear the httpOnly cookie
+		reply.clearCookie("authToken", {
+			path: "/",
+		});
 		return reply.send({ message: "Sign out successfully" });
 	});
 }

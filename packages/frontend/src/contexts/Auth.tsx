@@ -24,19 +24,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		// Check if user is already authenticated on app load
 		const verifyAuth = async () => {
-			const token = localStorage.getItem("authToken");
-
-			if (!token) {
-				setIsVerifying(false);
-				return;
-			}
-
 			try {
-				// Verify token with backend
+				// Verify token with backend (cookie will be sent automatically)
 				const response = await fetch("/auth/verify", {
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
+					credentials: "include",
 				});
 
 				if (response.ok) {
@@ -45,13 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 					if (jwtPayload.user) {
 						setUser(jwtPayload.user);
 					}
-				} else {
-					// Token is invalid or expired
-					localStorage.removeItem("authToken");
 				}
 			} catch (error) {
 				console.error("Auth verification failed:", error);
-				localStorage.removeItem("authToken");
 			} finally {
 				setIsVerifying(false);
 			}
@@ -65,25 +52,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	};
 
 	const signOut = async () => {
-		const token = localStorage.getItem("authToken");
-
 		// Clear local state immediately for better UX
 		setUser(null);
-		localStorage.removeItem("authToken");
 
-		// Call server sign out endpoint if token exists
-		if (token) {
-			try {
-				await fetch("/auth/sign-out", {
-					method: "POST",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				});
-			} catch (error) {
-				// Log error but don't throw - user is already signed out locally
-				console.error("Server sign out error:", error);
-			}
+		// Call server sign out endpoint
+		try {
+			await fetch("/auth/sign-out", {
+				method: "POST",
+				credentials: "include",
+			});
+		} catch (error) {
+			// Log error but don't throw - user is already signed out locally
+			console.error("Server sign out error:", error);
 		}
 	};
 

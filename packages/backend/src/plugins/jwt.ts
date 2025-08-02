@@ -27,7 +27,15 @@ async function jwtPlugin(
 		"authenticate",
 		async (request: FastifyRequest, reply: FastifyReply) => {
 			try {
-				await request.jwtVerify();
+				// First try to get token from cookie
+				const token = request.cookies.authToken;
+				if (token) {
+					const decoded = await fastify.jwt.verify(token);
+					request.user = decoded;
+				} else {
+					// Fallback to Authorization header for backwards compatibility
+					await request.jwtVerify();
+				}
 			} catch (_err) {
 				reply.code(401).send({ error: "Unauthorized" });
 			}
