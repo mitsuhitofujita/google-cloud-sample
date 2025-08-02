@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		const verifyAuth = async () => {
 			try {
 				// Verify token with backend (cookie will be sent automatically)
-				const response = await fetch("/auth/verify", {
+				const response = await fetch("/api/auth/verify", {
 					credentials: "include",
 				});
 
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 		// Call server sign out endpoint
 		try {
-			await fetch("/auth/sign-out", {
+			await fetch("/api/auth/sign-out", {
 				method: "POST",
 				credentials: "include",
 			});
