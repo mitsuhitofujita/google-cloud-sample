@@ -20,9 +20,10 @@ const server = fastify({
 const port = Number(process.env.PORT) || 8080;
 
 // Register CORS
-const corsOrigin = process.env.NODE_ENV === "production" 
-	? true // Allow same origin in production
-	: process.env.FRONTEND_URL || "http://localhost:8080";
+const corsOrigin =
+	process.env.NODE_ENV === "production"
+		? true // Allow same origin in production
+		: process.env.FRONTEND_URL || "http://localhost:8080";
 
 server.register(fastifyCors, {
 	origin: corsOrigin,
