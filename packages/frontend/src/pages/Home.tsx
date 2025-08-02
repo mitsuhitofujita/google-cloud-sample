@@ -23,6 +23,7 @@ function Home() {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 					body: JSON.stringify({
 						idToken: credentialResponse.credential,
 					}),
@@ -36,10 +37,7 @@ function Home() {
 					throw new Error("Authentication failed");
 				}
 
-				const { user, token } = await response.json();
-
-				// Store JWT token in localStorage
-				localStorage.setItem("authToken", token);
+				const { user } = await response.json();
 
 				// Update auth context
 				signIn(user);
@@ -58,19 +56,8 @@ function Home() {
 
 	const handleSignOut = async () => {
 		try {
-			// Call sign out endpoint
-			await fetch("/api/auth/sign-out", {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-				},
-			});
-
-			// Clear local storage
-			localStorage.removeItem("authToken");
-
-			// Update auth context
-			signOut();
+			// Update auth context (this will handle server-side sign out)
+			await signOut();
 		} catch (error) {
 			console.error("Sign out error:", error);
 		}

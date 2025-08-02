@@ -6,6 +6,7 @@ import type {
 	FastifyRequest,
 } from "fastify";
 import fp from "fastify-plugin";
+import type { JWTPayload } from "../types/index";
 
 async function jwtPlugin(
 	fastify: FastifyInstance,
@@ -27,7 +28,15 @@ async function jwtPlugin(
 		"authenticate",
 		async (request: FastifyRequest, reply: FastifyReply) => {
 			try {
-				await request.jwtVerify();
+				// First try to get token from cookie
+				const token = request.cookies?.authToken;
+				if (token) {
+					const decoded = fastify.jwt.verify(token) as JWTPayload;
+					request.user = decoded.user;
+				} else {
+					// Fallback to Authorization header for backwards compatibility
+					await request.jwtVerify();
+				}
 			} catch (_err) {
 				reply.code(401).send({ error: "Unauthorized" });
 			}

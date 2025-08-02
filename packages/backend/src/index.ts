@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
@@ -23,6 +24,9 @@ server.register(fastifyCors, {
 	origin: process.env.FRONTEND_URL || "http://localhost:8080",
 	credentials: true,
 });
+
+// Register Cookie plugin
+server.register(fastifyCookie);
 
 // Register JWT plugin
 server.register(jwtPlugin);
