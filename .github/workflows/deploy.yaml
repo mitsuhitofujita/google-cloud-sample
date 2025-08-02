@@ -100,10 +100,10 @@ jobs:
         if: always()
         run: |
           echo "Getting Cloud Run logs..."
-          gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=${{ env.CLOUD_RUN_SERVICE }}" \
-            --limit=20 \
-            --format="table(timestamp, severity, textPayload)" \
-            --project=${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+          sleep 10
+          gcloud run services logs read ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GOOGLE_CLOUD_REGION }} \
+            --limit=50
 
       - name: Test deployment
         id: health_check
@@ -115,10 +115,9 @@ jobs:
           else
             echo "❌ Health check failed with status code: $response"
             echo "Getting recent logs for debugging..."
-            gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=${{ env.CLOUD_RUN_SERVICE }}" \
-              --limit=10 \
-              --format="table(timestamp, severity, textPayload)" \
-              --project=${{ env.GOOGLE_CLOUD_PROJECT_ID }}
+            gcloud run services logs read ${{ env.CLOUD_RUN_SERVICE }} \
+              --region=${{ env.GOOGLE_CLOUD_REGION }} \
+              --limit=20
             exit 1
           fi
       
