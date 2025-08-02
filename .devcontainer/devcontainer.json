@@ -5,6 +5,7 @@
 	// 開発に必要なツールやライブラリをインストール
 	"features": {
 		"ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"./features/claude-code": {}
 	},
 	// Fastifyのデフォルトポートをフォワード
