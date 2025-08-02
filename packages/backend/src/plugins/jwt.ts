@@ -30,14 +30,19 @@ async function jwtPlugin(
 			try {
 				// First try to get token from cookie
 				const token = request.cookies.authToken;
+				fastify.log.info("Auth middleware - cookies:", request.cookies);
+				fastify.log.info("Auth middleware - authToken:", token);
+
 				if (token) {
 					const decoded = fastify.jwt.verify(token) as JWTPayload;
 					request.user = decoded.user;
+					fastify.log.info("Auth middleware - decoded user:", request.user);
 				} else {
 					// Fallback to Authorization header for backwards compatibility
 					await request.jwtVerify();
 				}
-			} catch (_err) {
+			} catch (err) {
+				fastify.log.error("Auth middleware error:", err);
 				reply.code(401).send({ error: "Unauthorized" });
 			}
 		},
