@@ -55,7 +55,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			reply.setCookie("authToken", token, {
 				httpOnly: true,
 				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
+				sameSite: "strict",
 				path: "/",
 				maxAge: 60 * 60 * 24 * 7, // 7 days
 			});
@@ -76,9 +76,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			preHandler: [fastify.authenticate],
 		},
 		async (request, reply) => {
-			fastify.log.info("Verify endpoint called");
-			fastify.log.info({ cookies: request.cookies }, "Request cookies");
-			fastify.log.info({ user: request.user }, "Request user");
 			return reply.send(request.user);
 		},
 	);
