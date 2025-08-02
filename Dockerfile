@@ -13,6 +13,10 @@ COPY packages/ ./packages/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Build arguments for environment variables
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
 # Build frontend and backend
 RUN pnpm --filter frontend build
 RUN pnpm --filter backend build
