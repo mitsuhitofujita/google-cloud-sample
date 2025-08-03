@@ -1,5 +1,6 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./contexts/Auth";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
@@ -23,7 +24,14 @@ function App() {
 			<AuthProvider>
 				<Routes>
 					<Route path="/" element={<Home />} />
-					<Route path="/dashboard" element={<Dashboard />} />
+					<Route
+						path="/dashboard"
+						element={
+							<ProtectedRoute>
+								<Dashboard />
+							</ProtectedRoute>
+						}
+					/>
 				</Routes>
 			</AuthProvider>
 		</GoogleOAuthProvider>

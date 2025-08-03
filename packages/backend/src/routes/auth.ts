@@ -13,8 +13,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
 		fastify.log.error(request.body);
 		const { idToken } = request.body as { idToken: string };
 
-		fastify.log.error(idToken);
-
 		if (!idToken) {
 			return reply.code(400).send({ error: "ID token is required" });
 		}
