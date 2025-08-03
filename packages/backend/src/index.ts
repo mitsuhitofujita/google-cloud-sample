@@ -1,8 +1,8 @@
 import path from "node:path";
 import fastifyCookie from "@fastify/cookie";
-import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import fastify from "fastify";
+import corsPlugin from "./plugins/cors";
 import jwtPlugin from "./plugins/jwt";
 import authRoutes from "./routes/auth";
 
@@ -15,19 +15,11 @@ const server = fastify({
 // Get port from environment variable or use default
 const port = Number(process.env.PORT) || 8080;
 
-// Register CORS
-const corsOrigin =
-	process.env.NODE_ENV === "production"
-		? true // Allow same origin in production
-		: process.env.FRONTEND_URL || "http://localhost:8080";
-
-server.register(fastifyCors, {
-	origin: corsOrigin,
-	credentials: true,
-});
-
 // Register Cookie plugin
 server.register(fastifyCookie);
+
+// Register CORS
+server.register(corsPlugin);
 
 // Register JWT plugin
 server.register(jwtPlugin);
@@ -35,8 +27,6 @@ server.register(jwtPlugin);
 server.addHook("onSend", async (_request, reply) => {
 	// Google OAuth用にCOOPヘッダーを削除または調整
 	reply.header("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-	// または完全に削除
-	// reply.removeHeader("Cross-Origin-Opener-Policy");
 });
 
 // Serve static files from the React build directory
@@ -68,8 +58,8 @@ server.setNotFoundHandler(async (request, reply) => {
 
 server.listen({ port, host: "0.0.0.0" }, (err, address) => {
 	if (err) {
-		console.error(err);
+		server.log.error(err);
 		process.exit(1);
 	}
-	console.log(`Server listening at ${address}`);
+	server.log.info(`Server listening at ${address}`);
 });
