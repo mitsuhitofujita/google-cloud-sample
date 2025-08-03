@@ -16,8 +16,6 @@ function App() {
 			</div>
 		);
 	}
-	console.log("Current Origin:", window.location.origin);
-	console.log("Google Client ID:", clientId);
 
 	return (
 		<GoogleOAuthProvider clientId={clientId}>
