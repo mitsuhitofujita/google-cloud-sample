@@ -10,13 +10,8 @@ function Home() {
 	const handleSignInSuccess = async (
 		credentialResponse: CredentialResponse,
 	) => {
-		console.log("Credential Response:", credentialResponse);
 		if (credentialResponse.credential) {
 			try {
-				const requestBody = {
-					idToken: credentialResponse.credential,
-				};
-				console.log("Sending request to /auth/google with body:", requestBody);
 				// Send ID token to backend for verification
 				const response = await fetch("/api/auth/google", {
 					method: "POST",
@@ -28,12 +23,8 @@ function Home() {
 						idToken: credentialResponse.credential,
 					}),
 				});
-				console.log("Response status:", response.status);
-				console.log("Response headers:", response.headers);
 
 				if (!response.ok) {
-					const responseText = await response.text();
-					console.log("Response text:", responseText);
 					throw new Error("Authentication failed");
 				}
 
