@@ -250,3 +250,62 @@ describe("/api/auth/google", () => {
 		});
 	});
 });
+
+describe("/api/auth/verify", () => {
+	it("should return user when cookie has valid token", async () => {
+		const user = {
+			id: "123",
+			email: "verify@example.com",
+			name: "Verify User",
+		};
+		const token = server.jwt.sign({ user });
+
+		const res = await server.inject({
+			method: "GET",
+			url: "/api/auth/verify",
+			cookies: { authToken: token },
+		});
+
+		expect(res.statusCode).toBe(200);
+		expect(res.json()).toEqual(user);
+	});
+
+	it("should return 401 when token is missing", async () => {
+		const res = await server.inject({
+			method: "GET",
+			url: "/api/auth/verify",
+		});
+
+		expect(res.statusCode).toBe(401);
+		expect(res.json()).toEqual({ error: "Unauthorized" });
+	});
+});
+
+describe("/api/auth/sign-out", () => {
+	it("should clear authToken cookie", async () => {
+		const token = server.jwt.sign({
+			user: {
+				id: "123",
+				email: "signout@example.com",
+				name: "Sign Out",
+			},
+		});
+
+		const res = await server.inject({
+			method: "POST",
+			url: "/api/auth/sign-out",
+			cookies: { authToken: token },
+		});
+
+		expect(res.statusCode).toBe(200);
+		expect(res.json()).toEqual({
+			message: "Sign out successfully",
+		});
+		const cookies = res.cookies;
+		expect(cookies).toHaveLength(1);
+		expect(cookies[0].name).toBe("authToken");
+		expect(cookies[0].value).toBe("");
+		expect(cookies[0].maxAge).toBe(0);
+		expect(cookies[0].path).toBe("/");
+	});
+});
